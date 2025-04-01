@@ -104,12 +104,12 @@ int main(int argc, char* argv[])
 		int msgStartIndex = 0;
 		while (msgStartIndex < 252)
 		{
-			if (msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ' && msg[msgStartIndex+2] == ' ')
+			if (msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ')
 			{
-				if (msg[msgStartIndex + 3] >= '!' && msg[msgStartIndex + 3] <= 'z') 
+				if (msg[msgStartIndex + 2] >= '!' && msg[msgStartIndex + 2] <= 'z') 
 				{
 					gotMsg = 1;
-					msgStartIndex += 3;
+					msgStartIndex += 2;
 					break;
 				}
 			}
@@ -122,9 +122,9 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		printf("%s\n", msg);
-		printf("%d\n", msgStartIndex);
-		printf("%s\n", (msg + msgStartIndex));
+		printf("Original text: %s\n", msg);
+		printf("Message start index: %d\n", msgStartIndex);
+		printf("Message: %s\n", (msg + msgStartIndex));
 
 		wchar_t wc[255];
 		mbstowcs(wc, msg + msgStartIndex, 255);
