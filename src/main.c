@@ -101,30 +101,33 @@ int main(int argc, char* argv[])
 		memcpy(lastMsg, msg, 255);
 
 		unsigned char gotMsg = 0;
+		unsigned char foundColon = 0;
 		int msgStartIndex = 0;
 		while (msgStartIndex < 252)
 		{
-			if (msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ')
+			if (foundColon && msg[msgStartIndex] >= '!' && msg[msgStartIndex] <= 'z')
 			{
-				if (msg[msgStartIndex + 2] >= '!' && msg[msgStartIndex + 2] <= 'z') 
-				{
-					gotMsg = 1;
-					msgStartIndex += 2;
-					break;
-				}
+				gotMsg = 1;
+				break;
+			}
+			
+			if (!foundColon && msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ')
+			{
+				foundColon = 1;
+				msgStartIndex++;
 			}
 			
 			msgStartIndex++;
 		}
 
-		if (!gotMsg) 
-		{
-			continue;
-		}
-
 		printf("Original text: %s\n", msg);
 		printf("Message start index: %d\n", msgStartIndex);
 		printf("Message: %s\n", (msg + msgStartIndex));
+
+		if (!gotMsg)
+		{
+			continue;
+		}
 
 		wchar_t wc[255];
 		mbstowcs(wc, msg + msgStartIndex, 255);
