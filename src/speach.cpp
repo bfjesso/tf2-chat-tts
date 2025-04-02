@@ -54,7 +54,9 @@ unsigned char speak(wchar_t* str, unsigned char isMale, int pitch)
         
         wchar_t wc[255];
         mbstowcs(wc, pitchModifier, 50);
+        int lastIndex = wcslen(wc) + wcslen(str);
         memcpy(wc + wcslen(wc), str, wcslen(str) * sizeof(wchar_t));
+        wc[lastIndex] = 0;
 
         hr = pVoice->Speak(wc, 0, NULL);
         pVoice->Release();

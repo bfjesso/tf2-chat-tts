@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
 		int gender = rand() % 2;
 		int pitch = rand() % 61 - 30;
 
-		printf("%d\n", gender);
-		printf("%d\n", pitch);
+		printf("Is male: %d\n", gender);
+		printf("Pitch: %d\n", pitch);
 
 		speak(wc, gender, pitch);
 
