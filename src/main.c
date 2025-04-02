@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -142,9 +143,15 @@ int main(int argc, char* argv[])
 		wchar_t wc[255];
 		mbstowcs(wc, msg + msgStartIndex, 255);
 
-		speak(wc);
+		int gender = rand() % 2;
+		int pitch = rand() % 61 - 30;
 
-		Sleep(1000);
+		printf("%d\n", gender);
+		printf("%d\n", pitch);
+
+		speak(wc, gender, pitch);
+
+		Sleep(500);
 	}
 	
 

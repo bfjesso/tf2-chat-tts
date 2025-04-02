@@ -2,7 +2,7 @@
 #include <sapi.h>
 #include <sphelper.h>
 
-unsigned char speak(wchar_t* str)
+unsigned char speak(wchar_t* str, unsigned char isMale, int pitch)
 {
     ISpVoice* pVoice = NULL;
     ISpObjectToken* cpAudioOutToken;
@@ -41,7 +41,22 @@ unsigned char speak(wchar_t* str)
 
     if (SUCCEEDED(hr))
     {
-        hr = pVoice->Speak(str, 0, NULL);
+        ISpObjectToken* cpToken(NULL);
+
+        if (isMale) { SpFindBestToken(SPCAT_VOICES, L"gender=male", L"", &cpToken); }
+        else { SpFindBestToken(SPCAT_VOICES, L"gender=female", L"", &cpToken); }
+        
+        pVoice->SetVoice(cpToken);
+        cpToken->Release();
+
+        char pitchModifier[50];
+        sprintf(pitchModifier, "<pitch middle = '%d'/>", pitch);
+        
+        wchar_t wc[255];
+        mbstowcs(wc, pitchModifier, 50);
+        memcpy(wc + wcslen(wc), str, wcslen(str) * sizeof(wchar_t));
+
+        hr = pVoice->Speak(wc, 0, NULL);
         pVoice->Release();
         pVoice = NULL;
     }

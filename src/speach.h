@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-unsigned char speak(wchar_t* str);
+unsigned char speak(wchar_t* str, unsigned char isMale, int pitch);
 
 #ifdef __cplusplus
 }
