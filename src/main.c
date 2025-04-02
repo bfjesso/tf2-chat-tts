@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	uintptr_t tier0 = GetModuleBaseAddress(procId, L"tier0_s64.dll");
 	if (!tier0)
 	{
-		printf("Failed to get base address of engine.dll.");
+		printf("Failed to get base address of tier0_s64.dll");
 		return 0;
 	}
 
@@ -103,12 +103,22 @@ int main(int argc, char* argv[])
 		unsigned char gotMsg = 0;
 		unsigned char foundColon = 0;
 		int msgStartIndex = 0;
+		int charsSinceColon = 0;
 		while (msgStartIndex < 252)
 		{
-			if (foundColon && msg[msgStartIndex] >= '!' && msg[msgStartIndex] <= 'z')
+			if (foundColon)
 			{
-				gotMsg = 1;
-				break;
+				if (charsSinceColon > 3) 
+				{
+					break;
+				}
+				else if (msg[msgStartIndex] >= '!' && msg[msgStartIndex] <= 'z') 
+				{
+					gotMsg = 1;
+					break;
+				}
+				
+				charsSinceColon++;
 			}
 			
 			if (!foundColon && msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ')
@@ -120,21 +130,21 @@ int main(int argc, char* argv[])
 			msgStartIndex++;
 		}
 
-		printf("Original text: %s\n", msg);
-		printf("Message start index: %d\n", msgStartIndex);
-		printf("Message: %s\n", (msg + msgStartIndex));
-
 		if (!gotMsg)
 		{
 			continue;
 		}
+
+		printf("Original text: %s\n", msg);
+		printf("Message start index: %d\n", msgStartIndex);
+		printf("Message: %s\n", (msg + msgStartIndex));
 
 		wchar_t wc[255];
 		mbstowcs(wc, msg + msgStartIndex, 255);
 
 		speak(wc);
 
-		Sleep(2000);
+		Sleep(1000);
 	}
 	
 
