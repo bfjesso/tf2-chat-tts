@@ -59,6 +59,95 @@ uintptr_t GetModuleBaseAddress(DWORD procId, const wchar_t* modName)
 	return modBaseAddr;
 }
 
+unsigned char getStartOfMsg(char* msg, int* startIndex)
+{
+	unsigned char gotMsg = 0;
+	unsigned char foundColon = 0;
+	int msgStartIndex = 0;
+	int charsSinceColon = 0;
+	while (msgStartIndex < 252)
+	{
+		if (foundColon)
+		{
+			char c = msg[msgStartIndex];
+
+			if (charsSinceColon > 5)
+			{
+				break;
+			}
+			else if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+			{
+				gotMsg = 1;
+				break;
+			}
+
+			charsSinceColon++;
+		}
+
+		if (!foundColon && msg[msgStartIndex] == ':' && msg[msgStartIndex + 1] == ' ')
+		{
+			foundColon = 1;
+			msgStartIndex++;
+		}
+
+		msgStartIndex++;
+	}
+
+	*startIndex = msgStartIndex;
+	return gotMsg;
+}
+
+void removeBadChars(char* msg, char* resultBuffer) 
+{
+	int cleanIndex = 0;
+
+	for (int i = 0; i < strlen(msg); i++)
+	{
+		char c = msg[i];
+
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '?' || c == '!' || c == ' ' || c == '.')
+		{
+			resultBuffer[cleanIndex] = c;
+			cleanIndex++;
+		}
+	}
+
+	resultBuffer[cleanIndex] = 0;
+}
+
+void getGenderAndPitch(char* msg, unsigned char* gender, int* pitch, int* offset) 
+{
+	*gender = rand() % 2;
+	*pitch = rand() % 61 - 30;
+
+	if (msg[0] == 'm' && msg[1] == '!')
+	{
+		*offset = 2;
+		*gender = 1;
+	}
+	else if (msg[0] == 'f' && msg[1] == '!')
+	{
+		*offset = 2;
+		*gender = 0;
+	}
+
+	if (msg[*offset] == 'l' && msg[(*offset)+1] == '!')
+	{
+		*offset += 2;
+		pitch = -30;
+	}
+	else if (msg[(*offset)] == 'm' && msg[(*offset) +1] == '!')
+	{
+		*offset += 2;
+		gender = 0;
+	}
+	else if (msg[(*offset)] == 'h' && msg[(*offset) +1] == '!')
+	{
+		*offset += 2;
+		gender = 30;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	DWORD procId = GetProcessId(L"tf_win64.exe");
@@ -101,57 +190,40 @@ int main(int argc, char* argv[])
 
 		memcpy(lastMsg, msg, 255);
 
-		unsigned char gotMsg = 0;
-		unsigned char foundColon = 0;
-		int msgStartIndex = 0;
-		int charsSinceColon = 0;
-		while (msgStartIndex < 252)
-		{
-			if (foundColon)
-			{
-				if (charsSinceColon > 3) 
-				{
-					break;
-				}
-				else if (msg[msgStartIndex] >= '!' && msg[msgStartIndex] <= 'z') 
-				{
-					gotMsg = 1;
-					break;
-				}
-				
-				charsSinceColon++;
-			}
-			
-			if (!foundColon && msg[msgStartIndex] == ':' && msg[msgStartIndex+1] == ' ')
-			{
-				foundColon = 1;
-				msgStartIndex++;
-			}
-			
-			msgStartIndex++;
-		}
-
-		if (!gotMsg)
+		int startIndex = 0;
+		if (!getStartOfMsg(msg, &startIndex))
 		{
 			continue;
 		}
 
-		printf("Original text: %s\n", msg);
-		printf("Message start index: %d\n", msgStartIndex);
-		printf("Message: %s\n", (msg + msgStartIndex));
+		if (argc > 1)
+		{
+			startIndex += strlen(argv[1]);
+		}
+
+		char cleanMsg[255];
+		removeBadChars(msg + startIndex, cleanMsg);
+
+		printf("Message start index: %d\n", startIndex);
+		printf("Message: %s\n", (msg + startIndex));
 
 		wchar_t wc[255];
-		mbstowcs(wc, msg + msgStartIndex, 255);
+		mbstowcs(wc, cleanMsg, 255);
 
-		int gender = rand() % 2;
-		int pitch = rand() % 61 - 30;
+		int gender = 0;
+		int pitch = 0;
+		int offset = 0;
+		getGenderAndPitch(cleanMsg, &gender, &pitch, &offset);
 
+		printf("Clean message: %s\n", cleanMsg + offset);
 		printf("Is male: %d\n", gender);
 		printf("Pitch: %d\n", pitch);
 
-		speak(wc, gender, pitch);
+		speak(wc + offset, gender, pitch);
 
-		Sleep(500);
+		printf("\n");
+
+		Sleep(100);
 	}
 	
 
