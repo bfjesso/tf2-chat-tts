@@ -139,12 +139,12 @@ void getGenderAndPitch(char* msg, unsigned char* gender, int* pitch, int* offset
 	else if (msg[(*offset)] == 'm' && msg[(*offset) +1] == '!')
 	{
 		*offset += 2;
-		gender = 0;
+		*pitch = 00;
 	}
 	else if (msg[(*offset)] == 'h' && msg[(*offset) +1] == '!')
 	{
 		*offset += 2;
-		gender = 30;
+		*pitch = 30;
 	}
 }
 
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 
 		printf("\n");
 
-		Sleep(100);
+		Sleep(1000);
 	}
 	
 
